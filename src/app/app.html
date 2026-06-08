@@ -1,0 +1,43 @@
+<div class="container">
+  <h2>MIDI Kantionalsatz-Generator</h2>
+  <p>Lade eine MIDI-Datei (.mid) mit einer einzelnen Melodiespur hoch. Die Anwendung berechnet automatisch Alt, Tenor
+    und Bass und fügt sie als neue Spuren hinzu.</p>
+
+  <div class="upload-section">
+    <input type="file" (change)="onFileSelected($event)" accept=".mid,.midi" id="midiInput">
+    <!--label for="midiInput" class="btn-upload">MIDI-Datei hochladen</label-->
+  </div>
+
+  <mat-accordion>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title> This is the expansion title </mat-panel-title>
+        <mat-panel-description> This is a summary of the content </mat-panel-description>
+      </mat-expansion-panel-header>
+      <p>This is the primary content of the panel.</p>
+    </mat-expansion-panel>
+  </mat-accordion>
+
+
+  @if (error) {
+    <div class="error-message">
+      {{ error }}
+    </div>
+  }
+
+  @if(midiService.functionsString.length>0){
+    Generierte Funktionen: {{midiService.functionsString}}
+  }
+
+  @if (generiertesMidi) {
+    <hr>
+
+    <div class="result-section">
+      <h3>Satz erfolgreich generiert!</h3>
+      <p>Die Datei enthält nun 4 separate Spuren (Sopran, Alt, Tenor, Bass) im homophonen Tonsatz.</p>
+      <p>Beachte: Dieser Satz wurde von einem Computer generiert. Computer sind denkbar schlechte Musiker, der Satz gibt
+        dir also nur eine Basis für eigene Kreativität.</p>
+      <button class="btn-download" (click)="downloadMidi()">4-stimmiges MIDI herunterladen</button>
+    </div>
+  }
+</div>
