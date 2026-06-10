@@ -1,43 +1,221 @@
-<div class="container">
-  <h2>MIDI Kantionalsatz-Generator</h2>
-  <p>Lade eine MIDI-Datei (.mid) mit einer einzelnen Melodiespur hoch. Die Anwendung berechnet automatisch Alt, Tenor
-    und Bass und fügt sie als neue Spuren hinzu.</p>
-
-  <div class="upload-section">
-    <input type="file" (change)="onFileSelected($event)" accept=".mid,.midi" id="midiInput">
-    <!--label for="midiInput" class="btn-upload">MIDI-Datei hochladen</label-->
-  </div>
-
-  <mat-accordion>
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
-        <mat-panel-title> This is the expansion title </mat-panel-title>
-        <mat-panel-description> This is a summary of the content </mat-panel-description>
-      </mat-expansion-panel-header>
-      <p>This is the primary content of the panel.</p>
-    </mat-expansion-panel>
-  </mat-accordion>
-
-
-  @if (error) {
-    <div class="error-message">
-      {{ error }}
+<div class="app-container">
+  <header class="app-header">
+    <div class="logo-area">
+      <span class="icon">🎼</span>
+      <h1>Kantionalsatz Generator</h1>
     </div>
-  }
+  </header>
 
-  @if(midiService.functionsString.length>0){
-    Generierte Funktionen: {{midiService.functionsString}}
-  }
+  <main class="main-content">
 
-  @if (generiertesMidi) {
-    <hr>
 
-    <div class="result-section">
-      <h3>Satz erfolgreich generiert!</h3>
-      <p>Die Datei enthält nun 4 separate Spuren (Sopran, Alt, Tenor, Bass) im homophonen Tonsatz.</p>
-      <p>Beachte: Dieser Satz wurde von einem Computer generiert. Computer sind denkbar schlechte Musiker, der Satz gibt
-        dir also nur eine Basis für eigene Kreativität.</p>
-      <button class="btn-download" (click)="downloadMidi()">4-stimmiges MIDI herunterladen</button>
+    <div class="card settings-card">
+      <h2>1. Generator-Einstellungen</h2>
+
+      <mat-accordion multi="true">
+        <mat-expansion-panel [expanded]="false">
+          <mat-expansion-panel-header>
+            <mat-panel-title class="panel">⚙️ Erweiterte Harmonisation</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="panel-content">
+            <div class="toggle-row">
+              <span>Septakkorde erlauben ($D^7$, $Sp^7$)</span>
+              <mat-slide-toggle [checked]="midiService.septs"
+                                (change)="midiService.septs=$event.checked">
+              </mat-slide-toggle>
+            </div>
+            <div class="toggle-row">
+              <span>Moll-Parallelen einbeziehen ($Tp$, $Sp$, $Dp$)</span>
+              <mat-slide-toggle c [checked]="midiService.parallels"
+                                (change)="midiService.parallels=$event.checked"></mat-slide-toggle>
+            </div>
+          </div>
+        </mat-expansion-panel>
+        <mat-expansion-panel [expanded]="false">
+          <mat-expansion-panel-header>
+            <mat-panel-title class="panel">🦘 Intervallparallelen ausschließen</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="panel-content">
+            <div class="toggle-row">
+              <span>Gleichklang/Oktavparallelen erlauben</span>
+              <mat-slide-toggle [checked]="!midiService.forbiddenParallels.includes(0)"
+                                (change)="addForbidden(0,$event.checked)">
+              </mat-slide-toggle>
+            </div>
+            <div class="toggle-row">
+              <span>kl. Sekundparallelen erlauben</span>
+              <mat-slide-toggle [checked]="!midiService.forbiddenParallels.includes(1)"
+                                (change)="addForbidden(1,$event.checked)">
+              </mat-slide-toggle>
+            </div>
+            <div class="toggle-row">
+              <span>gr. Sekundparallelen erlauben</span>
+              <mat-slide-toggle [checked]="!midiService.forbiddenParallels.includes(2)"
+                                (change)="addForbidden(2,$event.checked)">
+              </mat-slide-toggle>
+            </div>
+            <div class="toggle-row">
+              <span>kl. Terzparallelen erlauben</span>
+              <mat-slide-toggle [checked]="!midiService.forbiddenParallels.includes(3)"
+                                (change)="addForbidden(3,$event.checked)">
+              </mat-slide-toggle>
+            </div>
+            <div class="toggle-row">
+              <span>gr. Terzparallelen erlauben</span>
+              <mat-slide-toggle [checked]="!midiService.forbiddenParallels.includes(4)"
+                                (change)="addForbidden(4,$event.checked)">
+              </mat-slide-toggle>
+            </div>
+            <div class="toggle-row">
+              <span>Quartparallelen erlauben</span>
+              <mat-slide-toggle [checked]="!midiService.forbiddenParallels.includes(5)"
+                                (change)="addForbidden(5,$event.checked)">
+              </mat-slide-toggle>
+            </div>
+            <div class="toggle-row">
+              <span>Quintparallelen erlauben</span>
+              <mat-slide-toggle [checked]="!midiService.forbiddenParallels.includes(7)"
+                                (change)="addForbidden(7,$event.checked)">
+              </mat-slide-toggle>
+            </div>
+            <div class="toggle-row">
+              <span>kl. Sextparallelen erlauben</span>
+              <mat-slide-toggle [checked]="!midiService.forbiddenParallels.includes(8)"
+                                (change)="addForbidden(8,$event.checked)">
+              </mat-slide-toggle>
+            </div>
+            <div class="toggle-row">
+              <span>gr. Sextparallelen erlauben</span>
+              <mat-slide-toggle [checked]="!midiService.forbiddenParallels.includes(9)"
+                                (change)="addForbidden(9,$event.checked)">
+              </mat-slide-toggle>
+            </div>
+            <div class="toggle-row">
+              <span>kl. Septimparallelen erlauben</span>
+              <mat-slide-toggle [checked]="!midiService.forbiddenParallels.includes(10)"
+                                (change)="addForbidden(10,$event.checked)">
+              </mat-slide-toggle>
+            </div>
+            <div class="toggle-row">
+              <span>gr. Septimparallelen erlauben</span>
+              <mat-slide-toggle [checked]="!midiService.forbiddenParallels.includes(11)"
+                                (change)="addForbidden(11,$event.checked)">
+              </mat-slide-toggle>
+            </div>
+          </div>
+        </mat-expansion-panel>
+        <mat-expansion-panel [expanded]="false">
+          <mat-expansion-panel-header>
+            <mat-panel-title class="panel">🎺 Instrumentierung</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="panel-content">
+            <div class="toggle-row">
+              <span>Sopraninstrument</span>
+              <mat-select [(value)]="midiService.sopranInstrument">
+                @for(i of instrumentByPatchID; track i){
+                  <mat-option [value]="i">{{i}}</mat-option>
+                }
+              </mat-select>
+            </div>
+            <div class="toggle-row">
+              <span>Altinstrument</span>
+              <mat-select [(value)]="midiService.altInstrument">
+                @for(i of instrumentByPatchID; track i){
+                  <mat-option [value]="i">{{i}}</mat-option>
+                }
+              </mat-select>
+            </div>
+            <div class="toggle-row">
+              <span>Tenorinstrument</span>
+              <mat-select [(value)]="midiService.tenorInstrument">
+                @for(i of instrumentByPatchID; track i){
+                  <mat-option [value]="i">{{i}}</mat-option>
+                }
+              </mat-select>
+            </div>
+            <div class="toggle-row">
+              <span>Bassinstrument</span>
+              <mat-select [(value)]="midiService.bassInstrument">
+                @for(i of instrumentByPatchID; track i){
+                  <mat-option [value]="i">{{i}}</mat-option>
+                }
+              </mat-select>
+            </div>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
     </div>
-  }
+
+
+    <div class="card upload-card">
+      <h2>2. Choralmelodie hochladen</h2>
+      <p class="subtitle">Wähle eine einstimmige MIDI-Datei aus, um einen vierstimmigen Kantionalsatz zu generieren.</p>
+
+      <div class="file-drop-zone">
+        <input
+          type="file"
+          id="midiFileInput"
+          accept=".mid,.midi"
+          (change)="onFileSelected($event)"
+          #fileInput>
+
+        <label for="midiFileInput" class="drop-zone-label">
+          <span class="upload-icon">📥</span>
+          <strong>Datei auswählen</strong>
+          <span class="file-types">Unterstützt: .mid, .midi</span>
+        </label>
+      </div>
+
+      @if (generiertesMidi) {
+        <div class="file-info">
+          <span class="success-icon">✓</span>
+          <div class="file-details">
+            <span class="file-name">{{ outputDateiname }}</span>
+            <span class="file-status">Erfolgreich harmonisiert!</span>
+          </div>
+        </div>
+        <button mat-raised-button class="divider" (click)="startGeneration()">▶️ Erneut starten</button>
+      }
+    </div>
+
+    @if (generiertesMidi || error) {
+      <div class="card action-card">
+        <h2>3. Ergebnis & Download</h2>
+
+        @if (error) {
+          <div class="error-box">
+            <span class="error-icon">⚠️</span>
+            <p>{{ error }}</p>
+          </div>
+          <button mat-raised-button class="divider" (click)="startGeneration()">▶️ Erneut starten</button>
+        }
+
+        @if (generiertesMidi) {
+          <div class="download-zone">
+            <p>Dein vierstimmiger Satz steht zum Download bereit. Folgende Akkorde wurden berechnet:</p>
+            <mat-chip-set>
+              @for (f of midiService.functionsString; track f) {
+                <mat-chip [style.--mat-chip-label-text-color]="'#f8fafc'">{{ f }}</mat-chip>
+              }
+            </mat-chip-set>
+            <mat-divider class="divider"></mat-divider>
+            <button mat-raised-button color="primary" class="download-btn" (click)="downloadMidi()">
+              <span>🎵</span> MIDI-Satz herunterladen
+            </button>
+            <mat-divider class="divider"></mat-divider>
+            @if (midiUrl) {
+              <div class="download-zone">
+                <midi-player
+                  [attr.src]="midiUrl"
+                  sound-font="https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus"
+                  visualizer="#myVisualizer">
+                </midi-player>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+  </main>
 </div>

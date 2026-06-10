@@ -25,11 +25,11 @@ export class Akkord {
     return ret;
   }
 
-  generatePossibleSuccessors(next: number, finalis: boolean, possibleValues: Akkord[]): Akkord[] {
+  generatePossibleSuccessors(next: number, finalis: boolean, possibleValues: Akkord[], forbiddenParallels:number[]): Akkord[] {
     const ret: Akkord[] = [];
     possibleValues.forEach(a => {
       if (Math.abs(a.sopran - next) % 12 === 0) {
-        if (!this.parallels(a)) {
+        if (!this.parallels(a, forbiddenParallels)) {
           let add: Akkord = new Akkord(a.sopran, a.alt, a.tenor, a.bass, a.functionstring, a.finalis);
 
           if (add.alt - this.alt > 7) {
@@ -83,20 +83,19 @@ export class Akkord {
     return ret;
   }
 
-  private parallels(a: Akkord) {
+  private parallels(a: Akkord, fp:number[]) {
     let sum =
-      this.parallelInterval(this.sopran, this.alt, a.sopran, a.alt) +
-      this.parallelInterval(this.sopran, this.tenor, a.sopran, a.tenor) +
-      this.parallelInterval(this.sopran, this.bass, a.sopran, a.bass) +
-      this.parallelInterval(this.alt, this.tenor, a.alt, a.tenor) +
-      this.parallelInterval(this.alt, this.bass, a.alt, a.bass) +
-      this.parallelInterval(this.tenor, this.bass, a.tenor, a.bass);
+      this.parallelInterval(this.sopran, this.alt, a.sopran, a.alt,fp) +
+      this.parallelInterval(this.sopran, this.tenor, a.sopran, a.tenor,fp) +
+      this.parallelInterval(this.sopran, this.bass, a.sopran, a.bass,fp) +
+      this.parallelInterval(this.alt, this.tenor, a.alt, a.tenor,fp) +
+      this.parallelInterval(this.alt, this.bass, a.alt, a.bass,fp) +
+      this.parallelInterval(this.tenor, this.bass, a.tenor, a.bass,fp);
 
     return sum > 0;
   }
 
-  private parallelInterval(t1: number, o1: number, t2: number, o2: number) {
-    const forbiddenParallels: number[] = [0, 7]
+  private parallelInterval(t1: number, o1: number, t2: number, o2: number, forbiddenParallels:number[]) {
     if (forbiddenParallels.includes(Math.abs(t1 - o1) % 12)) {
       if (Math.abs(t1 - o1) % 12 === Math.abs(t2 - o2) % 12) {
         return 1;
@@ -105,7 +104,7 @@ export class Akkord {
     return 0;
   }
 
-  public static generateValidAkkords(finalis: number, septs?: boolean, mark?: string): Akkord[] {
+  public static generateValidAkkords(finalis: number, septs: boolean, parallels:boolean, mark?: string): Akkord[] {
     const tonika: Akkord = new Akkord(finalis + 7, finalis + 4, finalis, finalis - 12, "T", finalis)
     const tonika1: Akkord = new Akkord(finalis + 4, finalis, finalis - 5, finalis - 12, "T", finalis)
     const tonika2: Akkord = new Akkord(finalis, finalis - 5, finalis - 8, finalis - 12, "T", finalis)
@@ -117,32 +116,34 @@ export class Akkord {
     const dominante: Akkord = new Akkord(finalis + 2, finalis - 1, finalis - 5, finalis - 17, "D", finalis)
     const dominante1: Akkord = new Akkord(finalis + 7, finalis + 2, finalis - 1, finalis - 17, "D", finalis)
     const dominante2: Akkord = new Akkord(finalis - 1, finalis - 5, finalis - 10, finalis - 17, "D", finalis)
-
-    // --- TONIKAPARALLELE (Tp) ---
-// Grundton liegt 3 Halbtöne unter der Tonika (finalis - 3)
-    const tonikaparallele: Akkord = new Akkord(finalis + 4, finalis, finalis - 3, finalis - 15, "Tp", finalis);
-    const tonikaparallele1: Akkord = new Akkord(finalis + 9, finalis + 4, finalis, finalis - 15, "Tp", finalis);
-    const tonikaparallele2: Akkord = new Akkord(finalis, finalis - 3, finalis - 8, finalis - 15, "Tp", finalis);
-
-// --- SUBDOMINANTPARALLELE (Sp) ---
-// Grundton liegt 2 Halbtöne über der Tonika / 3 unter der Subdominante (finalis + 2)
-    const subdominantparallele: Akkord = new Akkord(finalis + 9, finalis + 5, finalis + 2, finalis - 10, "Sp", finalis);
-    const subdominantparallele1: Akkord = new Akkord(finalis + 14, finalis + 9, finalis + 5, finalis - 10, "Sp", finalis);
-    const subdominantparallele2: Akkord = new Akkord(finalis + 5, finalis + 2, finalis - 3, finalis - 10, "Sp", finalis);
-
-// --- DOMINANTPARALLELE (Dp) ---
-// Grundton liegt 4 Halbtöne über der Tonika / 3 unter der Dominante (finalis + 4)
-    const dominantparallele: Akkord = new Akkord(finalis + 11, finalis + 7, finalis + 4, finalis - 8, "Dp", finalis);
-    const dominantparallele1: Akkord = new Akkord(finalis + 16, finalis + 11, finalis + 7, finalis - 8, "Dp", finalis);
-    const dominantparallele2: Akkord = new Akkord(finalis + 7, finalis + 4, finalis - 1, finalis - 8, "Dp", finalis);
-
     const ret = [tonika, tonika1, tonika2,
       subdominante, subdominante1, subdominante2,
       dominante, dominante1, dominante2,
-      tonikaparallele, tonikaparallele1, tonikaparallele2,
-      subdominantparallele, subdominantparallele1, subdominantparallele2,
-      dominantparallele, dominantparallele1, dominantparallele2
     ];
+
+    if(parallels) {
+      // --- TONIKAPARALLELE (Tp) ---
+// Grundton liegt 3 Halbtöne unter der Tonika (finalis - 3)
+      const tonikaparallele: Akkord = new Akkord(finalis + 4, finalis, finalis - 3, finalis - 15, "Tp", finalis);
+      const tonikaparallele1: Akkord = new Akkord(finalis + 9, finalis + 4, finalis, finalis - 15, "Tp", finalis);
+      const tonikaparallele2: Akkord = new Akkord(finalis, finalis - 3, finalis - 8, finalis - 15, "Tp", finalis);
+
+// --- SUBDOMINANTPARALLELE (Sp) ---
+// Grundton liegt 2 Halbtöne über der Tonika / 3 unter der Subdominante (finalis + 2)
+      const subdominantparallele: Akkord = new Akkord(finalis + 9, finalis + 5, finalis + 2, finalis - 10, "Sp", finalis);
+      const subdominantparallele1: Akkord = new Akkord(finalis + 14, finalis + 9, finalis + 5, finalis - 10, "Sp", finalis);
+      const subdominantparallele2: Akkord = new Akkord(finalis + 5, finalis + 2, finalis - 3, finalis - 10, "Sp", finalis);
+
+// --- DOMINANTPARALLELE (Dp) ---
+// Grundton liegt 4 Halbtöne über der Tonika / 3 unter der Dominante (finalis + 4)
+      const dominantparallele: Akkord = new Akkord(finalis + 11, finalis + 7, finalis + 4, finalis - 8, "Dp", finalis);
+      const dominantparallele1: Akkord = new Akkord(finalis + 16, finalis + 11, finalis + 7, finalis - 8, "Dp", finalis);
+      const dominantparallele2: Akkord = new Akkord(finalis + 7, finalis + 4, finalis - 1, finalis - 8, "Dp", finalis);
+
+      ret.push(tonikaparallele, tonikaparallele1, tonikaparallele2,
+        subdominantparallele, subdominantparallele1, subdominantparallele2,
+        dominantparallele, dominantparallele1, dominantparallele2)
+    }
 
     if (septs) {
       // ==========================================

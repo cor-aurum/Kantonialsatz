@@ -6,8 +6,14 @@ import {Akkord} from './akkord';
   providedIn: 'root'
 })
 export class MidiKantionalService {
-  public septs: boolean=false;
-  public functionsString: string="";
+  public septs: boolean = false;
+  public parallels: boolean = true;
+  public functionsString: string[] = [];
+  public forbiddenParallels: number[] = [0,7];
+  public sopranInstrument:string="trumpet";
+  public altInstrument:string="trumpet";
+  public tenorInstrument:string="trombone";
+  public bassInstrument:string="trombone";
 
   constructor() {
   }
@@ -17,7 +23,7 @@ export class MidiKantionalService {
    * fügt die Begleitstimmen hinzu und gibt das neue MIDI als Uint8Array zurück.
    */
   public generiereKantionalsatz(fileBuffer: ArrayBuffer): Uint8Array {
-    this.functionsString="";
+    this.functionsString = [];
     // 1. Bestehende MIDI-Datei einlesen
     const midi = new Midi(fileBuffer);
     //console.log(JSON.parse(JSON.stringify(midi)))
@@ -30,38 +36,39 @@ export class MidiKantionalService {
       }
     }
     melodieSpur.name = "Sopran";
-    melodieSpur.instrument.name = "trumpet";
+    melodieSpur.instrument.name = this.sopranInstrument;
     if (midi.tracks.length > 1) {
       midi.tracks = [melodieSpur]
     }
     if (!melodieSpur || melodieSpur.notes.length === 0) {
       console.log(melodieSpur)
       console.error("Keine Noten in der ersten MIDI-Spur gefunden.")
-      //throw new Error("Keine Noten in der ersten MIDI-Spur gefunden.");
+      throw new Error("Keine Noten in der ersten MIDI-Spur gefunden.");
     }
 
     const finalis: number = melodieSpur.notes[melodieSpur.notes.length - 1].midi;
-    const possibleAkkords = Akkord.generateValidAkkords(finalis, this.septs);
+    const possibleAkkords = Akkord.generateValidAkkords(finalis, this.septs, this.parallels);
     // 2. Drei neue Spuren für den Chorsatz anlegen
     const altSpur = midi.addTrack();
     altSpur.name = "Alt";
-    altSpur.instrument.name = "trumpet"
+    altSpur.instrument.name = this.altInstrument;
 
     const tenorSpur = midi.addTrack();
     tenorSpur.name = "Tenor";
-    tenorSpur.instrument.name = "trombone";
+    tenorSpur.instrument.name = this.tenorInstrument;
 
     const bassSpur = midi.addTrack();
     bassSpur.name = "Bass";
-    bassSpur.instrument.name = "trombone";
+    bassSpur.instrument.name = this.bassInstrument;
 
     // 3. Jede einzelne Note der Melodie spiegeln und harmonisieren
     const akkorde: Akkord[] = [];
     if (!this.createNextAkkordRecursivly(akkorde, melodieSpur, [], finalis, possibleAkkords)) {
       console.error("Keine Harmonisierung gefunden")
+      throw new Error("Keine Harmonisierung gefunden.");
     }
     melodieSpur.notes.forEach((note, index) => {
-      this.functionsString+=akkorde[index].functionstring+"; ";
+      this.functionsString.push(akkorde[index].functionstring);
       // Alt hinzufügen (exakt dieselbe Startzeit und Dauer wie der Sopran)
       altSpur.addNote({
         midi: akkorde[index].alt,
@@ -119,7 +126,7 @@ export class MidiKantionalService {
     if (akkorde.length === 0) {
       tmp = Akkord.createFirstAkkords(aktuelleMidi, finalis, possibleAkkords);
     } else {
-      tmp = akkorde[akkorde.length - 1].generatePossibleSuccessors(aktuelleMidi, akkorde.length+1>=melodieSpur.notes.length, possibleAkkords);
+      tmp = akkorde[akkorde.length - 1].generatePossibleSuccessors(aktuelleMidi, akkorde.length + 1 >= melodieSpur.notes.length, possibleAkkords, this.forbiddenParallels);
     }
 
     // =========================================================================
@@ -127,7 +134,7 @@ export class MidiKantionalService {
     // =========================================================================
     if (tmp.length === 0 && !istLeitereigen && akkorde.length > 0) {
       console.log("Leiterfremder Ton erkannt. Versuche Alteration...");
-      tmp = Akkord.generateValidAkkords(finalis+1,this.septs,"*");
+      tmp = Akkord.generateValidAkkords(finalis + 1, this.septs, this.parallels, "*");
     }
     // Wenn der Ton leitereigen ist, bleibt tmp leer.
     // Das zwingt den Algorithmus ins Backtracking (Vorgängertöne ändern),

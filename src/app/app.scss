@@ -1,0 +1,211 @@
+@use '@angular/material' as mat;
+
+// Farbvariablen für ein modernes, edles "Musik-Software"-Design
+$dark-bg: #0f172a;
+$card-bg: #1e293b;
+$primary: #6366f1; // Modernes Indigo
+$primary-hover: #4f46e5;
+$accent: #10b981; // Smaragdgrün für Success-Zustände
+$text-main: #f8fafc;
+$text-muted: #94a3b8;
+$error-color: #ef4444;
+
+.app-container {
+  min-height: 100vh;
+  background-color: $dark-bg;
+  color: $text-main;
+  font-family: 'Roboto', sans-serif;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.panel {
+  color: $text-main;
+}
+
+.divider{
+  color: $text-main;
+  padding-top: 1em;
+  padding-bottom: 1em;
+}
+
+// Header
+.app-header {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem;
+  border-bottom: 1px solid rgba($text-muted, 0.1);
+  padding-bottom: 1rem;
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .icon { font-size: 2rem; }
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.05em;
+      background: linear-gradient(to right, #fff, $text-muted);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  }
+
+  .version-chip {
+    background-color: rgba($primary, 0.15) !important;
+    color: #a5b4fc !important;
+    border: 1px solid rgba($primary, 0.3);
+  }
+}
+
+// Layout & Cards
+.main-content {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.card {
+  background-color: $card-bg;
+  border-radius: 16px;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(#ffffff, 0.03);
+
+  h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  .subtitle {
+    color: $text-muted;
+    margin: 0 0 1.5rem 0;
+    font-size: 0.9rem;
+  }
+}
+
+// Custom File-Upload Zone
+.file-drop-zone {
+  position: relative;
+  border: 2px dashed rgba($text-muted, 0.3);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+  background-color: rgba($dark-bg, 0.3);
+
+  &:hover {
+    border-color: $primary;
+    background-color: rgba($primary, 0.05);
+  }
+
+  input[type="file"] {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .drop-zone-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+
+    .upload-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    strong { color: #fff; font-size: 1rem; }
+    .file-types { color: $text-muted; font-size: 0.8rem; }
+  }
+}
+
+// File Info & Status
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  padding: 1rem;
+  background-color: rgba($accent, 0.1);
+  border: 1px solid rgba($accent, 0.2);
+  border-radius: 8px;
+
+  .success-icon {
+    background-color: $accent;
+    color: $dark-bg;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 0.85rem;
+  }
+  .file-details {
+    display: flex; flex-direction: column;
+    .file-name { font-weight: 500; font-size: 0.95rem; color: #fff; }
+    .file-status { font-size: 0.8rem; color: rgba($accent, 0.8); }
+  }
+}
+
+// Download & Action-Bereich
+.download-zone {
+  p { color: $text-muted; font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; }
+
+  .download-btn {
+    background-color: $primary !important;
+    color: white !important;
+    padding: 0.75rem 2rem !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 14px rgba($primary, 0.4) !important;
+    transition: transform 0.15s ease !important;
+
+    &:hover {
+      background-color: $primary-hover !important;
+      transform: translateY(-1px);
+    }
+  }
+}
+// Error-Box
+.error-box {
+  display: flex; gap: 0.75rem; align-items: center;
+  padding: 1rem; background-color: rgba($error-color, 0.1);
+  border: 1px solid rgba($error-color, 0.2); border-radius: 8px;
+  color: #fca5a5; margin-bottom: 1rem;
+
+  p { margin: 0; font-size: 0.9rem; }
+  .error-icon { font-size: 1.2rem; }
+}
+
+// Settings & Accordion Overrides für Dark Mode
+.settings-card {
+  mat-accordion {
+    mat-expansion-panel {
+      background: rgba($dark-bg, 0.4) !important;
+      color: $text-main !important;
+      border: 1px solid rgba($text-muted, 0.1);
+
+      mat-expansion-panel-header {
+        padding: 0 1rem;
+        &:hover { background: rgba(#fff, 0.02) !important; }
+      }
+    }
+  }
+  .panel-content {
+    padding: 1rem 0;
+    display: flex; flex-direction: column; gap: 1rem;
+  }
+  .toggle-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.9rem; color: $text-muted;
+  }
+}

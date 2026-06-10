@@ -1,5 +1,5 @@
 {
-  "name": "kantonalsatz",
+  "name": "kantonialsatz",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -11,13 +11,19 @@
   "private": true,
   "packageManager": "npm@11.16.0",
   "dependencies": {
+    "@angular/cdk": "^22.0.0",
     "@angular/common": "^22.0.0",
     "@angular/compiler": "^22.0.0",
     "@angular/core": "^22.0.0",
     "@angular/forms": "^22.0.0",
+    "@angular/material": "^22.0.0",
     "@angular/platform-browser": "^22.0.0",
     "@angular/router": "^22.0.0",
+    "@magenta/music": "^1.23.1",
+    "@tonejs/midi": "^2.0.28",
+    "html-midi-player": "^1.6.0",
     "rxjs": "~7.8.0",
+    "tone": "^15.1.22",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
