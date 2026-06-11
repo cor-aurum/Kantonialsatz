@@ -8,6 +8,9 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
+  "browser": {
+    "buffer": false
+  },
   "private": true,
   "packageManager": "npm@11.16.0",
   "dependencies": {
